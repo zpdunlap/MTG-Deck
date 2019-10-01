@@ -1,5 +1,4 @@
-from flask import Flask
-import flask
+from flask import Flask, request, jsonify, abort, make_response
 from flask_sqlalchemy import SQLAlchemy
 import json
 
@@ -10,15 +9,33 @@ db = SQLAlchemy(app)
 
 
 
-class cardsDatabase(db.Model):
+class Cards(db.Model):
     __tablename__ = 'cards'
     id = db.Column('id', db.Integer, primary_key=True)
     name = db.Column('name', db.Text)
+    type = db.Column('type', db.Text)
+    color = db.Column('color', db.Text)
+    cost = db.Column('cost', db.Text)
+    rarity = db.Column('rarity', db.Text)
 
-    def __init__(self, id, name):
-        self.id = id
-        self.name = name
+    # def __init__(self, id, name):
+    #     self.id = id
+    #     self.name = name
 
+@app.route('/api/v1/cards/<int:card_id>', methods=['GET'])
+def get_card(card_id):
+    card = Cards.query.get(card_id)
+    print(card)
+    return jsonify({'id': card.id,"name":card.name})
+
+@app.route('/api/v1/cards', methods=['POST'])
+def add_card():
+    if not request.json or not 'name' in request.json:
+        abort(400)
+    card = Cards(name = request.json['name'], type = request.json['type'], color = request.json['color'], cost = request.json['cost'], rarity = request.json['rarity'])
+    db.session.add(card)
+    db.session.commit()
+    return jsonify({'id': card.id,"name":card.name}), 201
    
 if __name__ == '__main__':
     app.run(debug=True, 
