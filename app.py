@@ -25,7 +25,9 @@ class Cards(db.Model):
 @app.route('/api/v1/cards/<int:card_id>', methods=['GET'])
 def get_card(card_id):
     card = Cards.query.get(card_id)
-    print(card)
+    if not card:
+        app.logger.error('card could not be found')
+        abort(404)
     return jsonify({'id': card.id,"name":card.name})
 
 @app.route('/api/v1/cards', methods=['POST'])
@@ -35,6 +37,10 @@ def add_card():
     card = Cards(name = request.json['name'], type = request.json['type'], color = request.json['color'], cost = request.json['cost'], rarity = request.json['rarity'])
     db.session.add(card)
     db.session.commit()
+    if not card.id:
+        app.logger.error('card not saved in db')
+        abort(400)
+    app.logger.info('card saved')
     return jsonify({'id': card.id,"name":card.name}), 201
    
 if __name__ == '__main__':
