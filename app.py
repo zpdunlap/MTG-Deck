@@ -1,9 +1,11 @@
 from flask import Flask, request, jsonify, abort, make_response
 from flask_sqlalchemy import SQLAlchemy
 import json
+import os
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = 'sqlite:///C:\\Users\\gdihq\\Desktop\\MTG-Deck\\database.db'
+APP_ROOT = os.path.dirname(os.path.abspath(__file__))
+app.config["SQLALCHEMY_DATABASE_URI"] = 'sqlite:///' + os.path.join(APP_ROOT,"database.db")
 db = SQLAlchemy(app)
 
 
