@@ -40,6 +40,7 @@ def get_card(card_id):
     'name': card.name,
     'color': card.color,
     'cost': card.cost,
+    'type': card.type,
     'rarity': card.rarity
         }
     }), 200
@@ -50,9 +51,12 @@ def add_card():
     for field in fields:
         if not field in request.json:
          return jsonify({'error': {'code': 400, 'message': "missing '" + field + "' field"}}), 400
-    card = Cards(name = request.json['name'], type = request.json['type'], color = request.json['color'], cost = request.json['cost'], rarity = request.json['rarity'])
-    db.session.add(card)
-    db.session.commit()
+    try:
+        card = Cards(name = request.json['name'], type = request.json['type'], color = request.json['color'], cost = request.json['cost'], rarity = request.json['rarity'])
+        db.session.add(card)
+        db.session.commit()
+    except:
+        return jsonify({'error': {'code': 400, 'message': 'incorrect input'}}), 400
     if not card.id:
         app.logger.error('card not saved in db')
         return jsonify({'error': {'code': 400, 'message': 'card not saved in database'}}), 400
@@ -66,6 +70,7 @@ def add_card():
     'name': card.name,
     'color': card.color,
     'cost': card.cost,
+    'type': card.type,
     'rarity': card.rarity
         }
     }), 201
@@ -101,6 +106,7 @@ def update_card(card_id):
     'name': card[0].name,
     'color': card[0].color,
     'cost': card[0].cost,
+    'type': card[0].type,
     'rarity': card[0].rarity
         }
     }), 200
