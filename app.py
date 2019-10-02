@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, abort, make_response
+from flask import Flask, request, jsonify, abort
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import update
 import json
@@ -21,16 +21,13 @@ class Cards(db.Model):
     cost = db.Column('cost', db.Text)
     rarity = db.Column('rarity', db.Text)
 
-    # def __init__(self, id, name):
-    #     self.id = id
-    #     self.name = name
-
 @app.route('/api/v1/cards/<int:card_id>', methods=['GET'])
 def get_card(card_id):
     card = Cards.query.get(card_id)
     if not card:
         app.logger.error('card could not be found')
-        return jsonify({'error': {'code': 404, 'message': 'card could not be found'}}), 404
+        return jsonify({'error': {'code': 404, 
+            'message': 'card could not be found'}}), 404
     return jsonify(
     {
     'code': 200,
@@ -50,16 +47,25 @@ def add_card():
     fields = ['name', 'type', 'color', 'cost', 'rarity']
     for field in fields:
         if not field in request.json:
-         return jsonify({'error': {'code': 400, 'message': "missing '" + field + "' field"}}), 400
+         return jsonify({'error': {'code': 400, 
+            'message': "missing '" + field + "' field"}}), 400
     try:
-        card = Cards(name = request.json['name'], type = request.json['type'], color = request.json['color'], cost = request.json['cost'], rarity = request.json['rarity'])
+        card = Cards(
+            name = request.json['name'], 
+            type = request.json['type'], 
+            color = request.json['color'], 
+            cost = request.json['cost'], 
+            rarity = request.json['rarity']
+            )
         db.session.add(card)
         db.session.commit()
     except:
-        return jsonify({'error': {'code': 400, 'message': 'incorrect input'}}), 400
+        return jsonify({'error': {'code': 400, 
+            'message': 'incorrect input'}}), 400
     if not card.id:
         app.logger.error('card not saved in db')
-        return jsonify({'error': {'code': 400, 'message': 'card not saved in database'}}), 400
+        return jsonify({'error': {'code': 400, 
+            'message': 'card not saved in database'}}), 400
     app.logger.info('card saved')
     return jsonify(
     {
@@ -80,19 +86,28 @@ def update_card(card_id):
     fields = ['name', 'type', 'color', 'cost', 'rarity']
     for field in fields:
         if not field in request.json:
-         return jsonify({'error': {'code': 400, 'message': "missing '" + field + "' field"}}), 400
+         return jsonify({'error': {'code': 400, 
+            'message': "missing '" + field + "' field"}}), 400
     card = db.session.query(Cards).filter_by(id=card_id)
     if not card:
         app.logger.error('card could not be found')
-        return jsonify({'error': {'code': 404, 'message': 'card could not be found'}}), 404
-    data_to_update = dict(name = request.json['name'], type = request.json['type'], color = request.json['color'], cost = request.json['cost'], rarity = request.json['rarity'])
+        return jsonify({'error': {'code': 404, 
+            'message': 'card could not be found'}}), 404
+    data_to_update = dict(
+        name = request.json['name'], 
+        type = request.json['type'], 
+        color = request.json['color'], 
+        cost = request.json['cost'], 
+        rarity = request.json['rarity']
+        )
 
     card.update(data_to_update)
     db.session.commit()
     try:
         if not card[0].id:
             app.logger.error('card not saved in db')
-            return jsonify({'error': {'code': 400, 'message': 'card not saved in database'}}), 400
+            return jsonify({'error': {'code': 400,
+             'message': 'card not saved in database'}}), 400
     except:
         app.logger.error('card array is empty')
         abort(400)
@@ -116,10 +131,12 @@ def remove_card(card_id):
     card = Cards.query.get(card_id)
     if not card:
         app.logger.error('card could not be found')
-        return jsonify({'error': {'code': 404, 'message': 'card could not be found'}}), 404
+        return jsonify({'error': {'code': 404,
+         'message': 'card could not be found'}}), 404
     db.session.delete(card)
     db.session.commit()
-    return jsonify({'code': 200, 'card': {'id': card.id,'name':card.name}}), 200 
+    return jsonify({'code': 200,
+     'card': {'id': card.id,'name':card.name}}), 200 
    
 if __name__ == '__main__':
     app.run(debug=True, 
